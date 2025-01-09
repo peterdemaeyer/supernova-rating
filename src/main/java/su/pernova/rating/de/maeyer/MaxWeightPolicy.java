@@ -9,6 +9,8 @@ import su.pernova.rating.Player;
  */
 public class MaxWeightPolicy implements WeightPolicy {
 
+	private static final long serialVersionUID = 1L;
+
 	private final WeightPolicy[] weightPolicies;
 
 	public MaxWeightPolicy(final WeightPolicy... weightPolicies) {

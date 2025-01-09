@@ -6,10 +6,11 @@ import static java.util.stream.Collectors.toList;
 
 import static su.pernova.rating.RatingUtils.padWeights;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
- * Combines ratings by taking the <i>weighted</i> average of the player's ratings.
+ * Combines ratings by taking the <i>weighed</i> average of the player's ratings.
  * Weights are decimal numbers in the range [0.0, 1.0] and apply from weakest to strongest player.
  * The # weights may be one less than the # players, in which case the strongest player's weight is computed as 1.0
  * minus the sum of the weights of the other players.
@@ -18,6 +19,8 @@ import java.util.List;
  * This "weakest link" model allows to compensate for a weaker player being the weakest link in the team.
  */
 public class WeighedAverageRatingCombiner implements RatingCombiner {
+
+	private static final long serialVersionUID = 1L;
 
 	private final double[] weights;
 

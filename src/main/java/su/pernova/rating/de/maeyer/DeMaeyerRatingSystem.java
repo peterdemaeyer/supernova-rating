@@ -5,7 +5,7 @@ import static java.lang.Math.max;
 import static java.lang.Math.min;
 import static java.util.Objects.requireNonNull;
 
-import com.google.gson.annotations.Since;
+import java.io.Serializable;
 
 import su.pernova.rating.AverageRatingCombiner;
 import su.pernova.rating.Match;
@@ -17,25 +17,20 @@ import su.pernova.rating.Team;
 
 public class DeMaeyerRatingSystem implements RatingSystem {
 
-	@Since(1.0)
+	private static final long serialVersionUID = 1L;
+
 	private final RatingCombiner ratingCombiner;
 
-	@Since(1.0)
 	private final RatingSplitter ratingSplitter;
 
-	@Since(1.0)
 	private final WeightPolicy weightPolicy;
 
-	@Since(1.0)
 	private final double absorptionFactor;
 
-	@Since(1.0)
 	private final double initialRating;
 
-	@Since(1.0)
 	private final double initialRatingExcess;
 
-	@Since(1.0)
 	private double ratingPoolExcess;
 
 	/**

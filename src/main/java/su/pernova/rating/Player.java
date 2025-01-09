@@ -3,9 +3,15 @@ package su.pernova.rating;
 import static java.lang.Double.compare;
 import static java.util.Objects.requireNonNull;
 
-public class Player implements Comparable<Player> {
+import java.io.Serializable;
+
+public class Player implements Comparable<Player>, Serializable {
+
+	private static final long serialVersionUID = 1L;
 
 	public final String id;
+
+	public final String name;
 
 	public double rating;
 
@@ -21,14 +27,23 @@ public class Player implements Comparable<Player> {
 	 * @param matchCount an initial match count.
 	 */
 	public Player(String id, double rating, long matchCount) {
+		this(id, null, rating, matchCount);
+	}
+
+	public Player(String id, String name, double rating, long matchCount) {
 		this.id = requireNonNull(id, "ID is null");
+		this.name = name;
 		this.rating = rating;
 		this.matchCount = matchCount;
 	}
 
 	@Override
 	public String toString() {
-		return id;
+		final StringBuilder builder = new StringBuilder(id);
+		if (name != null) {
+			builder.append(": ").append(name);
+		}
+		return builder.toString();
 	}
 
 	@Override

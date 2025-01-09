@@ -5,6 +5,8 @@ import static java.lang.Math.sqrt;
 
 public class SqrtAverageRatingCombiner implements RatingCombiner {
 
+	private static final long serialVersionUID = 1L;
+
 	@Override
 	public double combineRatings(Player... players) {
 		double sumOfSqrtsOfRatings = 0.;

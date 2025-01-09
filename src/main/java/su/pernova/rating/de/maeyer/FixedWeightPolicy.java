@@ -7,6 +7,8 @@ import su.pernova.rating.Player;
  */
 public class FixedWeightPolicy implements WeightPolicy {
 
+	private static final long serialVersionUID = 1L;
+
 	private final double weight;
 
 	public FixedWeightPolicy(final double weight) {

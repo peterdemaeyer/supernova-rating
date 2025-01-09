@@ -1,7 +1,9 @@
 package su.pernova.rating;
 
+import java.io.Serializable;
+
 @FunctionalInterface
-public interface RatingSystem {
+public interface RatingSystem extends Serializable {
 
 	/**
 	 * Applies this rating algorithm to a given match.

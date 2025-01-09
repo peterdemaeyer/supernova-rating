@@ -5,6 +5,8 @@ package su.pernova.rating;
  */
 public class AverageRatingCombiner implements RatingCombiner {
 
+	private static final long serialVersionUID = 1L;
+
 	@Override
 	public double combineRatings(final Player... players) {
 		double sumOfRatings = 0.;

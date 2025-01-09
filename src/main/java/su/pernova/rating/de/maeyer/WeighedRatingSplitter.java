@@ -1,5 +1,7 @@
 package su.pernova.rating.de.maeyer;
 
+import java.io.Serializable;
+
 /**
  * Splits the win (or loss) across players in a team according to the player's weights in the ante.
  * Weights are relative to each player's rating, so they do not say much about the absolute value of the ante, but
@@ -10,6 +12,8 @@ package su.pernova.rating.de.maeyer;
  * This means ratings will fluctuate more for novice players, which corresponds to intuition.
  */
 public class WeighedRatingSplitter implements RatingSplitter {
+
+	private static final long serialVersionUID = 1L;
 
 	@Override
 	public double[] split(final double combinedWeighedRating, final TeamContext teamContext) {

@@ -1,10 +1,12 @@
 package su.pernova.rating.de.maeyer;
 
+import java.io.Serializable;
+
 /**
  * Splits a combined rating across multiple players.
  * This is useful when combining a rating algorithm to team games.
  */
-public interface RatingSplitter {
+public interface RatingSplitter extends Serializable {
 
 	/**
 	 * Splits a combined rating amongst given players.

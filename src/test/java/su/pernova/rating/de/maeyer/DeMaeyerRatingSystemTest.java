@@ -4,33 +4,24 @@ import static java.lang.Double.isNaN;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Stream.concat;
 
-import static com.google.gson.FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES;
-import static com.google.gson.FormattingStyle.PRETTY;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import static su.pernova.rating.RatingUtils.sumOfRatings;
 
-import java.lang.reflect.Type;
 import java.util.stream.Stream;
 
-import com.google.gson.FieldNamingPolicy;
-import com.google.gson.FormattingStyle;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.InstanceCreator;
 import org.junit.jupiter.api.Test;
 
-import su.pernova.rating.AverageRatingCombiner;
+import su.pernova.io.SerializableTest;
 import su.pernova.rating.Match;
 import su.pernova.rating.Padel;
 import su.pernova.rating.Player;
-import su.pernova.rating.RatingCombiner;
 import su.pernova.rating.RatingSystem;
 import su.pernova.rating.RatingSystemTest;
 
-class DeMaeyerRatingSystemTest implements RatingSystemTest {
+class DeMaeyerRatingSystemTest implements RatingSystemTest, SerializableTest {
 
 	@Override
 	public RatingSystem newInstance() {
@@ -127,26 +118,5 @@ class DeMaeyerRatingSystemTest implements RatingSystemTest {
 		assertEquals(101L, ratedPlayer2.matchCount);
 		// 1923 = 800 + 1000 + 50 + 50 + (portion of rating pool excess = 23)
 		assertEquals(1923., sumOfRatings(strongUnratedPlayer1, strongUnratedPlayer2, ratedPlayer1, ratedPlayer2));
-	}
-
-	@Test
-	void serialization() {
-		final Gson gson = new GsonBuilder()
-				.setVersion(1.0)
-				.setFieldNamingPolicy(LOWER_CASE_WITH_UNDERSCORES)
-				.setFormattingStyle(PRETTY)
-				.registerTypeAdapter(RatingCombiner.class, (InstanceCreator<RatingCombiner>) type -> {
-					System.out.println(type.getTypeName());
-					return new AverageRatingCombiner();
-				})
-				.create();
-		final DeMaeyerRatingSystem ratingSystem = new DeMaeyerRatingSystem.Builder()
-				.setInitialRatingExcess(12.)
-				.setInitialRating(5.)
-				.build();
-		final String json = gson.toJson(ratingSystem);
-		System.out.println(json);
-		final RatingSystem clone = gson.fromJson(json, ratingSystem.getClass());
-		System.out.println(clone);
 	}
 }

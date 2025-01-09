@@ -24,6 +24,8 @@ import su.pernova.rating.WeighedAverageRatingCombiner;
  */
 public class EloRatingSystem implements RatingSystem {
 
+	private static final long serialVersionUID = 1L;
+
 	public final RatingCombiner ratingCombinerAlgorithm;
 
 	public final double initialRating;
