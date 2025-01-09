@@ -1,0 +1,15 @@
+krpy+elde-klva+jape=9-4
+krpy+klva-elde+jape=9-7
+#krpy+jape-elde+klva=
+
+daco+hava-gupe+stle=6-1
+daco+gupe-hava+stle=2-6
+daco+stle-hava+gupe=6-7
+
+evde+luva-maro+made=9-2
+evde+maro-luva+made=0-6
+evde+made-luva+maro=3-6
+
+kade+bava-brde-kama=9-6
+kade+brde-bava+kama=9-4
+#kade+kama-bava+bede=
