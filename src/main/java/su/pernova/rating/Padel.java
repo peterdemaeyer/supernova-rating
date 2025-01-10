@@ -1,5 +1,7 @@
 package su.pernova.rating;
 
+import static java.lang.System.currentTimeMillis;
+
 public final class Padel {
 
 	private Padel() {
@@ -18,6 +20,6 @@ public final class Padel {
 	}
 
 	public static Match newMatch(Player player1a, Player player1b, Player player2a, Player player2b, Set... sets) {
-		return new Match(new Team[] { new Team(player1a, player1b), new Team(player2a, player2b) }, sets);
+		return new Match(currentTimeMillis(), new Team[] { new Team(player1a, player1b), new Team(player2a, player2b) }, sets);
 	}
 }

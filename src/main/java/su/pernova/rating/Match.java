@@ -1,16 +1,20 @@
 package su.pernova.rating;
 
+import static java.lang.System.currentTimeMillis;
 import static java.util.Objects.requireNonNull;
 
 import java.util.Arrays;
 
 public class Match {
 
+	public final long time;
+
 	public final Team[] teams;
 
 	public final Set[] sets;
 
-	public Match(Team[] teams, Set... sets) {
+	public Match(long time, final Team[] teams, final Set... sets) {
+		this.time = time;
 		this.teams = requireNonNull(teams, "array of teams is null");
 //		for (Player player1 : team1.players) {
 //			for (Player player2 : team2.players) {
@@ -19,7 +23,7 @@ public class Match {
 //				}
 //			}
 //		}
-		this.sets = requireNonEmpty(requireNonNull(sets, "sets is null"), "sets is empty");
+		this.sets = requireNonEmpty(requireNonNull(sets, "array of sets is null"), "array of sets is empty");
 	}
 
 	@Override
@@ -50,6 +54,6 @@ public class Match {
 		for (int i = 0; i != n; i++) {
 			sets[i] = new Set(scores[i * 2], scores[i * 2 + 1]);
 		}
-		return new Match(new Team[] { new Team(player1a, player1b), new Team(player2a, player2b) }, sets);
+		return new Match(currentTimeMillis(), new Team[] { new Team(player1a, player1b), new Team(player2a, player2b) }, sets);
 	}
 }

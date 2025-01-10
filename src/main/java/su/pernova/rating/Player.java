@@ -4,6 +4,7 @@ import static java.lang.Double.compare;
 import static java.util.Objects.requireNonNull;
 
 import java.io.Serializable;
+import java.time.Instant;
 
 public class Player implements Comparable<Player>, Serializable {
 
@@ -17,6 +18,8 @@ public class Player implements Comparable<Player>, Serializable {
 
 	public long matchCount;
 
+	public long lastMatchTime;
+
 	public Player(String id) {
 		this(id, 0., 0L);
 	}
@@ -27,14 +30,15 @@ public class Player implements Comparable<Player>, Serializable {
 	 * @param matchCount an initial match count.
 	 */
 	public Player(String id, double rating, long matchCount) {
-		this(id, null, rating, matchCount);
+		this(id, null, rating, matchCount, -1L);
 	}
 
-	public Player(String id, String name, double rating, long matchCount) {
+	public Player(String id, String name, double rating, long matchCount, long lastMatchTime) {
 		this.id = requireNonNull(id, "ID is null");
 		this.name = name;
 		this.rating = rating;
 		this.matchCount = matchCount;
+		this.lastMatchTime = lastMatchTime;
 	}
 
 	@Override

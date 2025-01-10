@@ -155,6 +155,7 @@ public class DeMaeyerRatingSystem implements RatingSystem {
 		for (final Team team : match.teams) {
 			for (final Player player : team.players) {
 				player.matchCount++;
+				player.lastMatchTime = match.time;
 			}
 		}
 	}

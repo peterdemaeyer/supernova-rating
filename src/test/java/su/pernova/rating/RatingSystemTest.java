@@ -4,6 +4,7 @@ import static java.lang.Double.POSITIVE_INFINITY;
 import static java.lang.Double.isNaN;
 import static java.lang.Math.abs;
 import static java.lang.String.format;
+import static java.lang.System.currentTimeMillis;
 import static java.util.Arrays.asList;
 import static java.util.Collections.shuffle;
 import static java.util.Comparator.comparingDouble;
@@ -246,7 +247,7 @@ public interface RatingSystemTest {
 	default void matchWithZeroZeroScoreBehavesAsIfNoMatchPlayed() {
 		final Player player1 = new Player("Jeroen", 200., 0L);
 		final Player player2 = new Player("Piet", 200., 0L);
-		final Match match = new Match(new Team[] { new Team(player1), new Team(player2) }, new Set(0L, 0L));
+		final Match match = new Match(currentTimeMillis(), new Team[] { new Team(player1), new Team(player2) }, new Set(0L, 0L));
 		final RatingSystem ratingSystem = newInstance();
 		ratingSystem.apply(match);
 		assertEquals(0L, player1.matchCount);
