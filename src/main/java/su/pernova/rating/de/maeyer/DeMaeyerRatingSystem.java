@@ -31,7 +31,7 @@ public class DeMaeyerRatingSystem implements RatingSystem {
 
 	private final double initialRatingExcess;
 
-	private double ratingPoolExcess;
+	public double ratingPoolExcess;
 
 	/**
 	 * @param ratingCombiner a rating combiner, not {@code null}.

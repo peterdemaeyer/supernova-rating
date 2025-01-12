@@ -1,84 +1,77 @@
 package su.pernova.rating;
 
-import static java.lang.String.format;
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.util.Objects.requireNonNull;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.Serializable;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
-public final class Players {
+public final class Players implements Serializable {
 
-	private static final Pattern NAME_PATTERN = Pattern.compile("\\S+");
+	private static final long serialVersionUID = 1L;
 
-	private final List<Player> players = new ArrayList<>();
+	private final Map<Object, Player> playersByKey;
 
-	private final Map<String, Player> playersByKey = new LinkedHashMap<>();
+	public Players(final Map<Object, Player> playersByKey) {
+		this.playersByKey = requireNonNull(playersByKey, "map of players by key is null");
+	}
 
-	public Players(URI uri) {
+	public Collection<Player> getPlayers() {
+		return playersByKey.values();
+	}
+
+	public Player getPlayer(Object key) {
+		return playersByKey.get(key);
+	}
+
+	public void registerAll(final URI uri) throws IOException {
+		if (!uri.getPath().endsWith(".csv")) {
+			throw new IllegalArgumentException("not a CSV resource");
+		}
 		try (final BufferedReader reader = new BufferedReader(new InputStreamReader(uri.toURL().openStream(), UTF_8))) {
-			for (String name = reader.readLine(); name != null; name = reader.readLine()) {
-				name = name.trim();
-				if (name.isEmpty() || name.startsWith("#")) {
-					// Skip empty lines and comments.
-					continue;
-				}
-				final String nameKey = name.toLowerCase();
-				final Player player = new Player(name);
-				if (playersByKey.put(nameKey, player) != null) {
-					throw new IllegalArgumentException("duplicate name key: " + nameKey);
-				}
-				players.add(player);
-				final Matcher matcher = NAME_PATTERN.matcher(name);
-				final StringBuilder initials = new StringBuilder();
-				final StringBuilder doubleInitials = new StringBuilder();
-				boolean firstName = true;
-				while (matcher.find()) {
-					final String group = matcher.group().replaceAll("['`-]", "");
-					if (firstName) {
-						final String firstNameKey = group.toLowerCase();
-						final Player oldPlayer = playersByKey.put(firstNameKey, player);
-						if (oldPlayer != null) {
-							System.out.println(format("Omitting ambiguous first name key: \"%s\" [\"%s\", \"%s\"].", firstNameKey, oldPlayer, player));
-							playersByKey.remove(firstNameKey);
-						}
-						firstName = false;
-					}
-					initials.append(group.charAt(0));
-					if (doubleInitials.length() < 4) {
-						doubleInitials.append(group.charAt(0)).append(group.charAt(1));
-					}
-				}
-				final String initialsKey = initials.toString().toLowerCase();
-				Player oldPlayer = playersByKey.put(initialsKey, player);
-				if (oldPlayer != null) {
-					System.out.println(format("Omitting ambiguous initials key: \"%s\" [\"%s\", \"%s\"].", initialsKey, oldPlayer, player));
-					playersByKey.remove(initialsKey);
-				}
-				final String doubleInitialsKey = doubleInitials.toString().toLowerCase();
-				oldPlayer = playersByKey.put(doubleInitialsKey, player);
-				if (oldPlayer != null) {
-					System.out.println(format("Omitting ambiguous double initials key: \"%s\" [\"%s\", \"%s\"].", doubleInitialsKey, oldPlayer, player));
-					playersByKey.remove(doubleInitialsKey);
+			String line = reader.readLine();
+			final Map<String, Integer> indexesByColumn = new LinkedHashMap<>();
+			if (line != null) {
+				int index = 0;
+				for (final String column : line.split(",")) {
+					indexesByColumn.put(column.trim().toLowerCase(), index++);
 				}
 			}
-		} catch (IOException e) {
-			throw new RuntimeException(e);
+			final int lidnummerIndex = indexesByColumn.get("lidnummer");
+			final int voornaamIndex = indexesByColumn.get("voornaam");
+			final int naamIndex = indexesByColumn.get("naam");
+			for (line = reader.readLine(); line != null; line = reader.readLine()) {
+				final String[] columns = line.split(",");
+				final String lidnummer = columns[lidnummerIndex];
+				final Player[] newPlayer = new Player[1];
+				final String[] namen = new String[2];
+				playersByKey.computeIfAbsent(lidnummer, ignored -> newPlayer[0] = new Player(
+						lidnummer,
+						(namen[0] = columns[voornaamIndex].trim()) + " " + (namen[1] = columns[naamIndex].trim())
+				));
+				if (newPlayer[0] != null) {
+					final String shortname = computeShortname(namen);
+					System.out.println("Registering new player: " + newPlayer[0] + " with shortname: " + shortname);
+					playersByKey.putIfAbsent(shortname, newPlayer[0]);
+				}
+			}
 		}
 	}
 
-	public List<Player> getPlayers() {
-		return players;
-	}
-
-	public Player getPlayer(String key) {
-		return playersByKey.get(key.toLowerCase());
+	private static String computeShortname(final String[] names) {
+		final StringBuilder builder = new StringBuilder(names[0]);
+		for (final String part : names[1].split(" ")) {
+			builder.append(part.charAt(0));
+		}
+		return builder.toString();
 	}
 }

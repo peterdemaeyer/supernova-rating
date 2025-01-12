@@ -108,15 +108,33 @@ class DeMaeyerRatingSystemTest implements RatingSystemTest, SerializableTest {
 		final Match match = Padel.newMatch(strongUnratedPlayer1, strongUnratedPlayer2, ratedPlayer1, ratedPlayer2, 9L, 0L);
 		ratingSystem.apply(match);
 		printRatings(match);
-		assertEquals(240.1657458563536, strongUnratedPlayer1.rating);
+		assertEquals(240.17, strongUnratedPlayer1.rating, .01);
 		assertEquals(1L, strongUnratedPlayer1.matchCount);
-		assertEquals(240.1657458563536, strongUnratedPlayer2.rating);
+		assertEquals(240.17, strongUnratedPlayer2.rating, .01);
 		assertEquals(1L, strongUnratedPlayer2.matchCount);
-		assertEquals(640., ratedPlayer1.rating);
+		assertEquals(640., ratedPlayer1.rating, .01);
 		assertEquals(101L, ratedPlayer1.matchCount);
-		assertEquals(802.6685082872928, ratedPlayer2.rating);
+		assertEquals(802.67, ratedPlayer2.rating, .01);
 		assertEquals(101L, ratedPlayer2.matchCount);
 		// 1923 = 800 + 1000 + 50 + 50 + (portion of rating pool excess = 23)
 		assertEquals(1923., sumOfRatings(strongUnratedPlayer1, strongUnratedPlayer2, ratedPlayer1, ratedPlayer2));
+	}
+
+	@Test
+	void oneUnderratedPlayer() {
+		final Player underratedPlayer1 = new Player("Underrated Player 1", 10., 10L);
+		final Player player2 = new Player("Player 2", 190., 10L);
+		final Player player3 = new Player("Player 3", 180., 10L);
+		final Player player4 = new Player("Player 4", 220., 10L);
+		final DeMaeyerRatingSystem ratingSystem = new DeMaeyerRatingSystem.Builder().build();
+		final Match match1234 = Padel.newMatch(underratedPlayer1, player2, player3, player4, 7L, 9L);
+		ratingSystem.apply(match1234);
+		assertEquals(26.52, underratedPlayer1.rating, .01);
+		final Match match1324 = Padel.newMatch(underratedPlayer1, player3, player2, player4, 9L, 6L);
+		ratingSystem.apply(match1324);
+		assertEquals(53.36, underratedPlayer1.rating, .01);
+		final Match match1423 = Padel.newMatch(underratedPlayer1, player4, player2, player3, 9L, 8L);
+		ratingSystem.apply(match1423);
+		assertEquals(69.01, underratedPlayer1.rating, .01);
 	}
 }

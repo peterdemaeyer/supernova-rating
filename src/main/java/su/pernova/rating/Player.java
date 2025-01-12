@@ -1,10 +1,9 @@
 package su.pernova.rating;
 
 import static java.lang.Double.compare;
-import static java.util.Objects.requireNonNull;
+import static java.lang.Long.compare;
 
 import java.io.Serializable;
-import java.time.Instant;
 
 public class Player implements Comparable<Player>, Serializable {
 
@@ -34,16 +33,20 @@ public class Player implements Comparable<Player>, Serializable {
 	}
 
 	public Player(String id, String name, double rating, long matchCount, long lastMatchTime) {
-		this.id = requireNonNull(id, "ID is null");
+		this.id = id;
 		this.name = name;
 		this.rating = rating;
 		this.matchCount = matchCount;
 		this.lastMatchTime = lastMatchTime;
 	}
 
+	public Player(String id, String name) {
+		this(id, name, 0., 0L, -1L);
+	}
+
 	@Override
 	public String toString() {
-		final StringBuilder builder = new StringBuilder(id);
+		final StringBuilder builder = new StringBuilder(String.valueOf(id));
 		if (name != null) {
 			builder.append(": ").append(name);
 		}
@@ -59,7 +62,7 @@ public class Player implements Comparable<Player>, Serializable {
 			return false;
 		}
 		Player player = (Player) o;
-		return id.equals(player.id);
+		return id == player.id;
 	}
 
 	@Override

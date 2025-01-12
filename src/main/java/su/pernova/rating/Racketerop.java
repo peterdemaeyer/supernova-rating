@@ -2,45 +2,65 @@ package su.pernova.rating;
 
 import static java.lang.ClassLoader.getSystemResource;
 import static java.lang.String.format;
+import static java.nio.file.Files.newOutputStream;
 import static java.util.Comparator.comparingDouble;
 
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.PrintStream;
 import java.net.URI;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
 import java.util.Comparator;
-import java.util.List;
+import java.util.LinkedHashMap;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
 import su.pernova.rating.de.maeyer.DeMaeyerRatingSystem;
-import su.pernova.rating.elo.EloRatingSystem;
 
 public class Racketerop {
 
 	public static void main(String[] args) throws Exception {
-		final Players players = new Players(getSystemResource("players.txt").toURI());
-		final List<URI> tournaments = Arrays.asList(
-				getSystemResource("racket-erop-2023-02-05.txt").toURI(),
-				getSystemResource("racket-erop-2023-02-12.txt").toURI(),
-				getSystemResource("racket-erop-2023-02-19.txt").toURI(),
-				getSystemResource("racket-erop-2023-02-26.txt").toURI(),
-				getSystemResource("racket-erop-2023-03-05.txt").toURI(),
-				getSystemResource("racket-erop-2023-03-12.txt").toURI(),
-				getSystemResource("racket-erop-2023-03-19.txt").toURI(),
-				getSystemResource("racket-erop-2023-03-26.txt").toURI()
-		);
-		final RatingSystem ratingSystem = new DeMaeyerRatingSystem.Builder()
-				.setAbsorptionFactor(.1)
-				.setInitialRating(100.)
-				.setInitialRatingExcess(100.)
-				.build();
-		for (URI tournament : tournaments) {
-			for (Match match : new Matches(tournament, players).matches) {
-				ratingSystem.apply(match);
+		URL url = getSystemResource("players.ser");
+		Players players;
+		if (url != null) {
+			try (final ObjectInputStream objIn = new ObjectInputStream(url.openStream())) {
+				System.out.println("Loading players from: " + url);
+				players = (Players) objIn.readObject();
 			}
-			printRatings(System.out, players, Paths.get(tournament.getPath()).getFileName());
-			System.out.println(ratingSystem);
+		} else {
+			url = Paths.get("players.ser").toUri().toURL();
+			players = new Players(new LinkedHashMap<>());
+		}
+		final DeMaeyerRatingSystem ratingSystem = new DeMaeyerRatingSystem.Builder()
+				.setAbsorptionFactor(.1)
+				.setInitialRating(75.)
+				.setInitialRatingExcess(125.)
+				.build();
+		for (final String arg : args) {
+			final URI uri = getSystemResource(arg).toURI();
+			if (arg.endsWith(".csv")) {
+				players.registerAll(uri);
+			} else if (arg.endsWith(".txt")) {
+				for (Match match : new Matches(uri, players).matches) {
+					System.out.println("Applying rating system to match: " + match);
+					ratingSystem.apply(match);
+				}
+				printRatings(System.out, players, uri);
+				System.out.println(ratingSystem);
+			}
+		}
+		double totalRating = ratingSystem.ratingPoolExcess;
+		int playerCount = players.getPlayers().size();
+		for (final Player player : players.getPlayers()) {
+			totalRating += player.rating;
+		}
+		System.out.println(playerCount + "/" + totalRating + "/" + ratingSystem.ratingPoolExcess);
+		try (final ObjectOutputStream objOut = new ObjectOutputStream(newOutputStream(Paths.get(url.toURI())))) {
+			System.out.println("Writing players to: " + url);
+			objOut.writeObject(players);
 		}
 	}
 
@@ -51,6 +71,6 @@ public class Racketerop {
 		orderByRating = orderByRating.reversed();
 		final SortedSet<Player> sortedPlayers = new TreeSet<>(orderByRating);
 		sortedPlayers.addAll(players.getPlayers());
-		sortedPlayers.forEach(player -> stream.printf("%-30s: %.2f (/%d)%n", player.id, player.rating, player.matchCount));
+		sortedPlayers.forEach(player -> stream.printf("%-30s: %.2f (/%d)%n", player.name, player.rating, player.matchCount));
 	}
 }

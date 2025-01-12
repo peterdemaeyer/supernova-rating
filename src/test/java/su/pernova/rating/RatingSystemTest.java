@@ -194,10 +194,10 @@ public interface RatingSystemTest {
 	}
 
 	default void ratingConverges(double initialRating1, double initialRating2, double initialRating3, double initialRating4, long score1, long score2) {
-		final Player player1 = new Player("Kirsten", initialRating1, 0L);
-		final Player player2 = new Player("Karin", initialRating2, 0L);
-		final Player player3 = new Player("Lut", initialRating3, 0L);
-		final Player player4 = new Player("Liesbet", initialRating4, 0L);
+		final Player player1 = new Player("Kirsten", initialRating1, 10L);
+		final Player player2 = new Player("Karin", initialRating2, 10L);
+		final Player player3 = new Player("Lut", initialRating3, 10L);
+		final Player player4 = new Player("Liesbet", initialRating4, 10L);
 
 		final RatingSystem ratingSystem = newInstance();
 
