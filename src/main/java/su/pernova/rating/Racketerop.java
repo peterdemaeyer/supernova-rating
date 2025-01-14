@@ -10,8 +10,6 @@ import java.io.ObjectOutputStream;
 import java.io.PrintStream;
 import java.net.URI;
 import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
@@ -49,19 +47,22 @@ public class Racketerop {
 					ratingSystem.apply(match);
 				}
 				printRatings(System.out, players, uri);
-				System.out.println(ratingSystem);
 			}
 		}
-		double totalRating = ratingSystem.ratingPoolExcess;
-		int playerCount = players.getPlayers().size();
-		for (final Player player : players.getPlayers()) {
-			totalRating += player.rating;
-		}
-		System.out.println(playerCount + "/" + totalRating + "/" + ratingSystem.ratingPoolExcess);
 		try (final ObjectOutputStream objOut = new ObjectOutputStream(newOutputStream(Paths.get(url.toURI())))) {
 			System.out.println("Writing players to: " + url);
 			objOut.writeObject(players);
 		}
+	}
+
+	private static double computeRatingPool(final DeMaeyerRatingSystem ratingSystem, final Players players) {
+		double ratingPool = ratingSystem.ratingPoolExcess;
+		for (final Player player : players.getPlayers()) {
+			if (player.matchCount > 0L) {
+				ratingPool += player.rating;
+			}
+		}
+		return ratingPool;
 	}
 
 	private static void printRatings(PrintStream stream, Players players, Object subject) {
@@ -72,5 +73,6 @@ public class Racketerop {
 		final SortedSet<Player> sortedPlayers = new TreeSet<>(orderByRating);
 		sortedPlayers.addAll(players.getPlayers());
 		sortedPlayers.forEach(player -> stream.printf("%-30s: %.2f (/%d)%n", player.name, player.rating, player.matchCount));
+		stream.println("================================================================================");
 	}
 }

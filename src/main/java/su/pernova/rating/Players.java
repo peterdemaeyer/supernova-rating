@@ -8,11 +8,9 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Serializable;
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.LinkedHashMap;
-import java.util.List;
+import java.util.LinkedHashSet;
 import java.util.Map;
 
 public final class Players implements Serializable {
@@ -26,7 +24,7 @@ public final class Players implements Serializable {
 	}
 
 	public Collection<Player> getPlayers() {
-		return playersByKey.values();
+		return new LinkedHashSet<>(playersByKey.values());
 	}
 
 	public Player getPlayer(Object key) {
