@@ -11,7 +11,6 @@ import su.pernova.rating.Match;
 import su.pernova.rating.RatingCombiner;
 import su.pernova.rating.RatingSystem;
 import su.pernova.rating.Set;
-import su.pernova.rating.WeighedAverageRatingCombiner;
 
 /**
  * This class implements the Elo rating system for zero-sum games for two teams,
@@ -103,9 +102,5 @@ public class EloRatingSystem implements RatingSystem {
 		final double q2 = pow(base, r2 / scale);
 		final double q1q2 = q1 + q2;
 		return new double[] { q1 / q1q2, q2 / q1q2 };
-	}
-
-	public static EloRatingSystem padel() {
-		return new EloRatingSystem(new WeighedAverageRatingCombiner(.7), 150., 10., 40., 4.);
 	}
 }

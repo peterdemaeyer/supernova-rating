@@ -1,11 +1,10 @@
 package su.pernova.rating;
 
-import static java.lang.Double.compare;
-import static java.lang.Long.compare;
+import static java.util.Objects.requireNonNull;
 
 import java.io.Serializable;
 
-public class Player implements Comparable<Player>, Serializable {
+public class Player implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
@@ -33,7 +32,7 @@ public class Player implements Comparable<Player>, Serializable {
 	}
 
 	public Player(String id, String name, double rating, long matchCount, long lastMatchTime) {
-		this.id = id;
+		this.id = requireNonNull(id, "ID is null");
 		this.name = name;
 		this.rating = rating;
 		this.matchCount = matchCount;
@@ -58,21 +57,14 @@ public class Player implements Comparable<Player>, Serializable {
 		if (this == o) {
 			return true;
 		}
-		if (o == null || getClass() != o.getClass()) {
-			return false;
+		if (o instanceof Player player) {
+			return id.equals(player.id);
 		}
-		Player player = (Player) o;
-		return id == player.id;
+		return false;
 	}
 
 	@Override
 	public int hashCode() {
 		return id.hashCode();
-	}
-
-	@Override
-	public int compareTo(Player p) {
-		int result = compare(rating, p.rating);
-		return result != 0 ? result : id.compareTo(p.id);
 	}
 }

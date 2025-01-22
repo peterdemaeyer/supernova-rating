@@ -13,7 +13,7 @@ public class Match {
 
 	public final Set[] sets;
 
-	public Match(long time, final Team[] teams, final Set... sets) {
+	public Match(final long time, final Team[] teams, final Set... sets) {
 		this.time = time;
 		this.teams = requireNonNull(teams, "array of teams is null");
 //		for (Player player1 : team1.players) {
@@ -38,14 +38,14 @@ public class Match {
 		return builder + " = " + Arrays.toString(sets);
 	}
 
-	private static Set[] requireNonEmpty(Set[] sets, String message) {
+	private static Set[] requireNonEmpty(final Set[] sets, final String message) {
 		if (sets.length == 0) {
 			 throw new IllegalArgumentException(message);
 		}
 		return sets;
 	}
 
-	public static Match padel(Player player1a, Player player1b, Player player2a, Player player2b, long... scores) {
+	public static Match padel(final Player player1a, final Player player1b, final Player player2a, final Player player2b, final long... scores) {
 		if (scores.length % 2 == 1) {
 			throw new IllegalArgumentException("odd # scores: " + scores.length);
 		}

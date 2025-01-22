@@ -9,7 +9,7 @@ class TeamTest {
 
 	@Test
 	void constructionThrowsWhenPlayerIsNull() {
-		assertEquals("player is null",
+		assertEquals("array of players contains null",
 				assertThrows(NullPointerException.class,
 						() -> new Team(null, new Player("1a")))
 						.getMessage());

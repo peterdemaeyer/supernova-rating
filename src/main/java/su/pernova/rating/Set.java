@@ -11,9 +11,9 @@ public final class Set {
 	 */
 	public Set(long... score) {
 		this.score = requireNonNull(score, "score is null");
-		for (final long games : score) {
-			if (games < 0L) {
-				throw new IllegalArgumentException("# won games < 0");
+		for (final long numGames : score) {
+			if (numGames < 0L) {
+				throw new IllegalArgumentException("# games < 0");
 			}
 		}
 	}

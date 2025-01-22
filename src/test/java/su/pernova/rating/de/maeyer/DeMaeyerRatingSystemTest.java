@@ -9,7 +9,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import static su.pernova.rating.RatingUtils.sumOfRatings;
-import static su.pernova.rating.de.maeyer.DeMaeyerRatingSystem.computeWinRating1;
 
 import java.util.stream.Stream;
 
@@ -40,7 +39,8 @@ class DeMaeyerRatingSystemTest implements RatingSystemTest, SerializableTest {
 		ratingSystem.apply(match1234);
 		assertEquals(weakestPlayer.rating, weakerPlayer.rating);
 		assertEquals(strongerPlayer.rating, strongestPlayer.rating);
-		assertEquals(weakestPlayer.rating * 9. / 2., strongerPlayer.rating, .01);
+		assertTrue(weakestPlayer.rating < strongestPlayer.rating);
+		assertTrue(weakestPlayer.rating >= 2. / 9. * strongerPlayer.rating);
 		printRatings(match1234);
 
 		final Match match1342 = Match.padel(weakestPlayer, strongerPlayer, weakerPlayer, strongestPlayer, 6L, 9L);
@@ -51,7 +51,7 @@ class DeMaeyerRatingSystemTest implements RatingSystemTest, SerializableTest {
 		assertTrue(weakestPlayer.rating < weakerPlayer.rating);
 		assertTrue(weakerPlayer.rating < strongerPlayer.rating);
 		assertTrue(strongerPlayer.rating < strongestPlayer.rating);
-		assertTrue(weakestPlayer.rating * 9. / 2. < strongestPlayer.rating);
+		assertTrue(weakestPlayer.rating >= 2. / 9. * strongestPlayer.rating);
 	}
 
 	@Test
@@ -108,13 +108,13 @@ class DeMaeyerRatingSystemTest implements RatingSystemTest, SerializableTest {
 		final Match match = Padel.newMatch(strongUnratedPlayer1, strongUnratedPlayer2, ratedPlayer1, ratedPlayer2, 9L, 0L);
 		ratingSystem.apply(match);
 		printRatings(match);
-		assertEquals(240.45, strongUnratedPlayer1.rating, .01);
+		assertEquals(241.67, strongUnratedPlayer1.rating, .01);
 		assertEquals(1L, strongUnratedPlayer1.matchCount);
-		assertEquals(240.45, strongUnratedPlayer2.rating, .01);
+		assertEquals(strongUnratedPlayer1.rating, strongUnratedPlayer2.rating, .01);
 		assertEquals(1L, strongUnratedPlayer2.matchCount);
-		assertEquals(640.93, ratedPlayer1.rating, .01);
+		assertEquals(639.85, ratedPlayer1.rating, .01);
 		assertEquals(101L, ratedPlayer1.matchCount);
-		assertEquals(801.17, ratedPlayer2.rating, .01);
+		assertEquals(799.81, ratedPlayer2.rating, .01);
 		assertEquals(101L, ratedPlayer2.matchCount);
 		// 1923 = 800 + 1000 + 50 + 50 + (portion of rating pool excess = 23)
 		assertEquals(1923., sumOfRatings(strongUnratedPlayer1, strongUnratedPlayer2, ratedPlayer1, ratedPlayer2));
@@ -129,13 +129,13 @@ class DeMaeyerRatingSystemTest implements RatingSystemTest, SerializableTest {
 		final DeMaeyerRatingSystem ratingSystem = new DeMaeyerRatingSystem.Builder().build();
 		final Match match1234 = Padel.newMatch(underratedPlayer1, player2, player3, player4, 7L, 9L);
 		ratingSystem.apply(match1234);
-		assertEquals(11.43, underratedPlayer1.rating, .01);
+		assertEquals(13.12, underratedPlayer1.rating, .01);
 		final Match match1324 = Padel.newMatch(underratedPlayer1, player3, player2, player4, 9L, 6L);
 		ratingSystem.apply(match1324);
-		assertEquals(15.30, underratedPlayer1.rating, .01);
+		assertEquals(19.73, underratedPlayer1.rating, .01);
 		final Match match1423 = Padel.newMatch(underratedPlayer1, player4, player2, player3, 9L, 8L);
 		ratingSystem.apply(match1423);
-		assertEquals(19.17, underratedPlayer1.rating, .01);
+		assertEquals(28.80, underratedPlayer1.rating, .01);
 	}
 
 	@Test
@@ -158,12 +158,5 @@ class DeMaeyerRatingSystemTest implements RatingSystemTest, SerializableTest {
 		assertEquals(10. * player1.rating, player3.rating);
 		assertTrue(player4.rating > 120.);
 		assertEquals(12. * player1.rating, player4.rating);
-	}
-
-	@Test
-	void computationOfWinRating1() {
-		assertEquals(7., computeWinRating1(10., 10., 7., 5., 12.));
-		assertEquals(2.5, computeWinRating1(5., 10., 5., 7., 12.));
-		assertEquals(9.5, computeWinRating1(10., 5., 7., 5., 12.));
 	}
 }

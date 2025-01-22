@@ -186,17 +186,36 @@ public class DeMaeyerRatingSystem implements RatingSystem {
 		return ratingCombiner.combineRatings(match.teams[0].players) / ratingCombiner.combineRatings(match.teams[1].players);
 	}
 
-	static double computeWinRating1(double actualGameRatio1, double expectedGameRatio1, double sumOfWeighedRatings1, double sumOfWeighedRatings2, double sumOfWeighedRatings) {
+	private static double computeWinRating1(double actualGameRatio1, double expectedGameRatio1, double sumOfWeighedRatings1, double sumOfWeighedRatings2, double sumOfWeighedRatings) {
 		if (actualGameRatio1 == expectedGameRatio1) {
 			// Break even.
 			return sumOfWeighedRatings1;
 		}
+		// Whichever team wins, this limits the loss of the other team to the actual game ratio.
+		final double ratingLimit1 = computeRatingLimit1(actualGameRatio1, sumOfWeighedRatings);
 		if (actualGameRatio1 < expectedGameRatio1) {
 			// Team 2 wins.
-			return actualGameRatio1 / expectedGameRatio1 * sumOfWeighedRatings1;
+			if (ratingLimit1 > sumOfWeighedRatings1) {
+				// Contradictory situation: team 2 loses weight even though they did better than expected.
+				// Assume it can't happen.
+				throw new IllegalArgumentException("losing rating limit: " + ratingLimit1 + " > sum of weighed ratings 1: " + sumOfWeighedRatings1);
+			}
+			return ratingLimit1 + actualGameRatio1 / expectedGameRatio1 * (sumOfWeighedRatings1 - ratingLimit1);
 		}
 		// Team 1 wins.
-		return sumOfWeighedRatings1 + expectedGameRatio1 / actualGameRatio1 * sumOfWeighedRatings2;
+		if (ratingLimit1 < sumOfWeighedRatings1) {
+			// Contradictory situation: team 1 loses weight even though they did better than expected.
+			// Assume it can't happen.
+			throw new IllegalArgumentException("winning rating limit: " + ratingLimit1 + " < sum of weighed ratings 1: " + sumOfWeighedRatings1);
+		}
+		return sumOfWeighedRatings - expectedGameRatio1 / actualGameRatio1 * (sumOfWeighedRatings2 - ratingLimit1);
+	}
+
+	private static double computeRatingLimit1(final double gameRatio1, final double sumOfWeighedRatings) {
+		if (gameRatio1 <= 1.) {
+			return 1. / (1. / gameRatio1 + 1.) * sumOfWeighedRatings;
+		}
+		return gameRatio1 / (gameRatio1 + 1.) * sumOfWeighedRatings;
 	}
 
 	@Override

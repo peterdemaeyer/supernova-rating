@@ -8,6 +8,13 @@ public final class RatingUtils {
 	private RatingUtils() {
 	}
 
+	public static <E> E[] requireArrayNonNull(final E[] array, final String name) {
+		for (final E element : requireNonNull(array, "array of " + name + " is null")) {
+			requireNonNull(element, "array of " + name + " contains null");
+		}
+		return array;
+	}
+
 	public static double sumOfRatings(final Player... players) {
 		double sumOfRatings = 0.;
 		for (final Player player : players) {
