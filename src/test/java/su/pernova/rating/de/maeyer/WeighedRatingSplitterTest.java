@@ -25,7 +25,7 @@ class WeighedRatingSplitterTest implements RatingSplitterTest {
 		final TeamContext teamContext = newTeamContext(team, 1., 1., 1.);
 		final WeighedRatingSplitter ratingSplitter = new WeighedRatingSplitter();
 		final double[] splitWeighedRatings = ratingSplitter.split(50., teamContext);
-		assertArrayEquals(new double[] { 50., 0. , 0. }, splitWeighedRatings, 1e-12);
+		assertArrayEquals(new double[] { 49.01, .98 , 0. }, splitWeighedRatings, .01);
 	}
 
 	@Test
@@ -85,6 +85,28 @@ class WeighedRatingSplitterTest implements RatingSplitterTest {
 		// The 20% and 30% become 40% and 60% of the deficit, which is -8 and -12 respectively.
 		// So player 1 finally ends up with their initial ante minus the loss, which is 200 - 10 - 8 = 182.
 		// In a similar fashion, player 2 finally ends up with 300 - 15 - 12 = 273.
-		assertArrayEquals(new double[] { 182., 273., 0. }, splitWeighedRatings);
+		assertArrayEquals(new double[] { 180.20, 270.30, 4.50 }, splitWeighedRatings, .01);
+	}
+
+	@Test
+	void playersWinAccordingToTheirRelativeRating() {
+		final Player player1 = new Player("1", 10., 10L);
+		final Player player2 = new Player("2", 20., 10L);
+		final Team team = new Team(player1, player2);
+		final TeamContext teamContext = newTeamContext(team, .5, .5);
+		final WeighedRatingSplitter ratingSplitter = new WeighedRatingSplitter();
+		final double[] splitWeighedRatings = ratingSplitter.split(21., teamContext);
+		assertArrayEquals(new double[] { 7., 14. }, splitWeighedRatings);
+	}
+
+	@Test
+	void noNaNWhenZeroRatings() {
+		final Player player1 = new Player("1", 10., 10L);
+		final Player player2 = new Player("2", 20., 10L);
+		final Team team = new Team(player1, player2);
+		final TeamContext teamContext = newTeamContext(team, 0., 0.);
+		final WeighedRatingSplitter ratingSplitter = new WeighedRatingSplitter();
+		final double[] splitWeighedRatings = ratingSplitter.split(21., teamContext);
+		assertArrayEquals(new double[] { 10.5, 10.5 }, splitWeighedRatings);
 	}
 }

@@ -3,27 +3,27 @@ package su.pernova.rating;
 import static java.lang.ClassLoader.getSystemResource;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.net.URISyntaxException;
+import java.util.LinkedHashMap;
 
 import org.junit.jupiter.api.Test;
 
 class PlayersTest {
 
 	@Test
-	void players() throws URISyntaxException {
-		final Players players = new Players(getSystemResource("players.txt").toURI());
-		Player player5 = players.getPlayer("peter");
-		assertEquals("Peter De Maeyer", player5.id);
-		Player player4 = players.getPlayer("pdm");
-		assertEquals("Peter De Maeyer", player4.id);
-		Player player3 = players.getPlayer("Peter De Maeyer");
-		assertEquals("Peter De Maeyer", player3.id);
-		Player player2 = players.getPlayer("peter de maeyer");
-		assertEquals("Peter De Maeyer", player2.id);
-		Player player1 = players.getPlayer("pede");
-		assertEquals("Peter De Maeyer", player1.id);
-		Player player = players.getPlayer("jedh");
-		assertEquals("Jens D'Hoine", player.id);
+	void players() throws Exception {
+		final Players players = new Players(new LinkedHashMap<>());
+		players.registerAll(getSystemResource("test-players.csv").toURI());
+		Player player1 = players.getPlayer("1");
+		assertEquals("1", player1.id);
+		assertEquals("Peter De Maeyer", player1.name);
+		Player player2 = players.getPlayer("KirstenR");
+		assertEquals("2", player2.id);
+		assertEquals("Kirsten Robberecht", player2.name);
+		Player player5 = players.getPlayer("5");
+		assertEquals("5", player5.id);
+		assertEquals("Peter De Maeyer", player5.name);
 	}
 }

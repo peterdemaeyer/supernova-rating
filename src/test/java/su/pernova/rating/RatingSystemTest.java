@@ -258,7 +258,7 @@ public interface RatingSystemTest {
 //
 //	@Test
 //	default void ratingConvergesX() throws Exception {
-//		final Players players = new Players(getSystemResource("test-players.txt").toURI());
+//		final Players players = new Players(getSystemResource("test-players.csv").toURI());
 //		final Map<Player, Double> levels = readLevels(getSystemResource("test-levels.txt").toURI(), players);
 //		RatingSystem ratingSystem = newInstance();
 //		int iterationCount = 0;

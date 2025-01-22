@@ -5,8 +5,6 @@ import static java.lang.Math.max;
 import static java.lang.Math.min;
 import static java.util.Objects.requireNonNull;
 
-import java.io.Serializable;
-
 import su.pernova.rating.AverageRatingCombiner;
 import su.pernova.rating.Match;
 import su.pernova.rating.Player;
@@ -27,11 +25,11 @@ public class DeMaeyerRatingSystem implements RatingSystem {
 
 	private final double absorptionFactor;
 
-	private final double initialRating;
+	private final double newPlayerRating;
 
-	private final double initialRatingExcess;
+	private final double newPlayerPooledRating;
 
-	public double ratingPoolExcess;
+	public double systemPooledRating;
 
 	/**
 	 * @param ratingCombiner a rating combiner, not {@code null}.
@@ -41,15 +39,15 @@ public class DeMaeyerRatingSystem implements RatingSystem {
 	 * @param weightPolicy a policy returning the weight of the last match compared to all previous matches.
 	 */
 	private DeMaeyerRatingSystem(RatingCombiner ratingCombiner, RatingSplitter ratingSplitter,
-			WeightPolicy weightPolicy, double absorptionFactor, double initialRating, double initialRatingExcess,
-			double initialRatingPoolExcess) {
+								 WeightPolicy weightPolicy, double absorptionFactor, double newPlayerRating, double newPlayerPooledRating,
+								 double systemPooledRating) {
 		this.ratingCombiner = requireNonNull(ratingCombiner, "rating combiner is null");
 		this.ratingSplitter = requireNonNull(ratingSplitter, "rating splitter is null");
 		this.weightPolicy = requireNonNull(weightPolicy, "weight policy is null");
 		this.absorptionFactor = absorptionFactor;
-		this.initialRating = initialRating;
-		this.initialRatingExcess = initialRatingExcess;
-		this.ratingPoolExcess = initialRatingPoolExcess;
+		this.newPlayerRating = newPlayerRating;
+		this.newPlayerPooledRating = newPlayerPooledRating;
+		this.systemPooledRating = systemPooledRating;
 	}
 
 	static class ActualGameRatioResult {
@@ -87,14 +85,6 @@ public class DeMaeyerRatingSystem implements RatingSystem {
 		// Calculate the expected score ratio relative to team 2, based on the ratings.
 		// The relative to team 2 is the inverse, we don't need to calculate it.
 		final double expectedGameRatio = computeExpectedGameRatio(match);
-		if ((expectedGameRatio < r.minExpectedGameRatio && r.actualGameRatio < r.minExpectedGameRatio)
-				|| (expectedGameRatio > r.maxExpectedGameRatio && r.actualGameRatio > r.maxExpectedGameRatio)) {
-			updateMatchCounts(match);
-			return;
-		}
-		// Calculate the win ratio relative to team 1.
-		// It is a measure of "how well" team 1 actually performed against team 2 compared to expectations.
-		final double winRatio1 = r.actualGameRatio / expectedGameRatio;
 		// Given the rating update newRating = (1 - weight) * oldRating + weight * ratingUpdate,
 		// and given that the total pool of rating in the system must remain constant (no inflation nor deflation),
 		// the total ante to be split across all players is the sum of all player's individual antes: weight * oldRating.
@@ -107,13 +97,21 @@ public class DeMaeyerRatingSystem implements RatingSystem {
 		final double weighedAnte1 = teamContext1.sumOfWeighedRatings;
 		final double weighedAnte2 = teamContext2.sumOfWeighedRatings;
 		double weighedAnte = weighedAnte1 + weighedAnte2;
+		// Calculate the win ratio relative to team 1.
+		// It is a measure of "how well" team 1 actually performed against team 2 compared to expectations.
+		final double winRating1 = ((expectedGameRatio < r.minExpectedGameRatio && r.actualGameRatio < r.minExpectedGameRatio)
+				|| (expectedGameRatio > r.maxExpectedGameRatio && r.actualGameRatio > r.maxExpectedGameRatio)) ?
+			computeWinRating1(1., 1., weighedAnte1, weighedAnte2, weighedAnte) :
+			computeWinRating1(r.actualGameRatio, expectedGameRatio, weighedAnte1, weighedAnte2, weighedAnte);
+		// weighedAnte will be potentially increased with pool ante, so we compute the winWeight1 BEFORE that.
+		final double winWeight1 = winRating1 / weighedAnte;
 		synchronized (this) {
-			if (ratingPoolExcess > 0.) {
-				final double poolAnte = min(absorptionFactor * weighedAnte, ratingPoolExcess);
+			if (systemPooledRating > 0.) {
+				final double poolAnte = min(absorptionFactor * weighedAnte, systemPooledRating);
 				weighedAnte += poolAnte;
 //				System.out.println("Decrementing rating pool excess: " + ratingPoolExcess + " with: " + poolAnte);
-				ratingPoolExcess -= poolAnte;
-			} else if (ratingPoolExcess < 0.) {
+				systemPooledRating -= poolAnte;
+			} else if (systemPooledRating < 0.) {
 				throw new IllegalStateException("rating pool deficit is not yet implemented");
 			}
 		}
@@ -121,10 +119,8 @@ public class DeMaeyerRatingSystem implements RatingSystem {
 		// The win ratio is team 1's actual score compared to their expected score.
 		// Remember that team 2's win ratio is the inverse of team 1's.
 		// The win weight is a team's fraction of the total ante.
-		final double winWeight1 = winRatio1 / (winRatio1 + 1.);
-		final double winWeight2 = 1. / (winRatio1 + 1.);
 		final double combinedWeighedRating1 = winWeight1 * weighedAnte;
-		final double combinedWeighedRating2 = winWeight2 * weighedAnte;
+		final double combinedWeighedRating2 = (1. - winWeight1) * weighedAnte;
 		final double[] newWeighedRatings1 = ratingSplitter.split(combinedWeighedRating1, teamContext1);
 		final double[] newWeighedRatings2 = ratingSplitter.split(combinedWeighedRating2, teamContext2);
 		updateRatings(teamContext1, newWeighedRatings1);
@@ -169,9 +165,9 @@ public class DeMaeyerRatingSystem implements RatingSystem {
 		}
 		final long maxGames = max(games1, games2);
 		// Clip the game ratio to avoid 0 and +Infinity ratios.
-		final double maxActualGameRatio = maxGames + 1L;
-		final double minActualGameRatio = 1. / maxActualGameRatio;
-		final double actualGameRatio = min(max((double) games1 / games2, minActualGameRatio), maxActualGameRatio);
+		final double maxGameRatio = maxGames + 1L;
+		final double minGameRatio = 1. / maxGameRatio;
+		final double actualGameRatio = min(max((double) games1 / games2, minGameRatio), maxGameRatio);
 		return new ActualGameRatioResult(actualGameRatio, maxGames);
 	}
 
@@ -180,10 +176,9 @@ public class DeMaeyerRatingSystem implements RatingSystem {
 			for (final Player player : team.players) {
 				if (player.matchCount == 0L) {
 					// Unrated player -> compute initial rating from team combined ratings.
-					player.rating = initialRating;
+					player.rating = newPlayerRating;
 					synchronized (this) {
-//						System.out.println("Incrementing rating pool excess: " + ratingPoolExcess + " with: " + initialRatingExcess);
-						ratingPoolExcess += initialRatingExcess;
+						systemPooledRating += newPlayerPooledRating;
 					}
 				}
 			}
@@ -191,9 +186,22 @@ public class DeMaeyerRatingSystem implements RatingSystem {
 		return ratingCombiner.combineRatings(match.teams[0].players) / ratingCombiner.combineRatings(match.teams[1].players);
 	}
 
+	static double computeWinRating1(double actualGameRatio1, double expectedGameRatio1, double sumOfWeighedRatings1, double sumOfWeighedRatings2, double sumOfWeighedRatings) {
+		if (actualGameRatio1 == expectedGameRatio1) {
+			// Break even.
+			return sumOfWeighedRatings1;
+		}
+		if (actualGameRatio1 < expectedGameRatio1) {
+			// Team 2 wins.
+			return actualGameRatio1 / expectedGameRatio1 * sumOfWeighedRatings1;
+		}
+		// Team 1 wins.
+		return sumOfWeighedRatings1 + expectedGameRatio1 / actualGameRatio1 * sumOfWeighedRatings2;
+	}
+
 	@Override
 	public String toString() {
-		return getClass().getSimpleName() + "[ratingPoolExcess=" + ratingPoolExcess + "]";
+		return getClass().getSimpleName() + "[ratingPoolExcess=" + systemPooledRating + "]";
 	}
 
 	public static class Builder {
@@ -202,13 +210,13 @@ public class DeMaeyerRatingSystem implements RatingSystem {
 
 		private RatingSplitter ratingSplitter = new WeighedRatingSplitter();
 
-		private double initialRatingPoolExcess;
+		private double systemPooledRating;
 
 		private WeightPolicy weightPolicy = new MaxWeightPolicy(new AverageWeightPolicy(), new FixedWeightPolicy(.2));
 
-		private double initialRating = 50.;
+		private double newPlayerRating = 50.;
 
-		private double initialRatingExcess = 150.;
+		private double newPlayerPooledRating = 150.;
 
 		private double absorptionFactor = .05;
 
@@ -228,11 +236,11 @@ public class DeMaeyerRatingSystem implements RatingSystem {
 		/**
 		 * Sets the initial rating for new players, 50 by default.
 		 *
-		 * @param initialRating the initial rating for new players.
+		 * @param rating the initial rating for new players.
 		 * @return this builder.
 		 */
-		public Builder setInitialRating(final double initialRating) {
-			this.initialRating = initialRating;
+		public Builder setNewPlayerRating(final double rating) {
+			this.newPlayerRating = rating;
 			return this;
 		}
 
@@ -242,11 +250,11 @@ public class DeMaeyerRatingSystem implements RatingSystem {
 		 * The initial rating excess is an additional contribution to the rating system's rating pool, on top of the
 		 * initial rating.
 		 *
-		 * @param initialRatingExcess the initial rating pool contribution for new players.
+		 * @param rating the initial rating pool contribution for new players.
 		 * @return this builder.
 		 */
-		public Builder setInitialRatingExcess(final double initialRatingExcess) {
-			this.initialRatingExcess = initialRatingExcess;
+		public Builder setNewPlayerPooledRating(final double rating) {
+			this.newPlayerPooledRating = rating;
 			return this;
 		}
 
@@ -255,11 +263,11 @@ public class DeMaeyerRatingSystem implements RatingSystem {
 		 * The rating pool is the excess of rating in the whole system, which may be negative.
 		 * This should not be set in normal circumstances, unless for deserialization purposes.
 		 *
-		 * @param initialRatingPoolExcess an initial rating pool for the rating system.
+		 * @param rating an initial rating pool for the rating system.
 		 * @return this builder.
 		 */
-		public Builder setInitialRatingPoolExcess(final double initialRatingPoolExcess) {
-			this.initialRatingPoolExcess = initialRatingPoolExcess;
+		public Builder setSystemPooledRating(final double rating) {
+			this.systemPooledRating = rating;
 			return this;
 		}
 
@@ -285,7 +293,7 @@ public class DeMaeyerRatingSystem implements RatingSystem {
 
 		public DeMaeyerRatingSystem build() {
 			return new DeMaeyerRatingSystem(ratingCombiner, ratingSplitter, weightPolicy, absorptionFactor,
-					initialRating, initialRatingExcess, initialRatingPoolExcess);
+					newPlayerRating, newPlayerPooledRating, systemPooledRating);
 		}
 	}
 }

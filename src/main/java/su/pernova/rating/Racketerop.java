@@ -34,8 +34,8 @@ public class Racketerop {
 		}
 		final DeMaeyerRatingSystem ratingSystem = new DeMaeyerRatingSystem.Builder()
 				.setAbsorptionFactor(.1)
-				.setInitialRating(75.)
-				.setInitialRatingExcess(125.)
+				.setNewPlayerRating(75.)
+				.setNewPlayerPooledRating(125.)
 				.build();
 		for (final String arg : args) {
 			final URI uri = getSystemResource(arg).toURI();
@@ -56,7 +56,7 @@ public class Racketerop {
 	}
 
 	private static double computeRatingPool(final DeMaeyerRatingSystem ratingSystem, final Players players) {
-		double ratingPool = ratingSystem.ratingPoolExcess;
+		double ratingPool = ratingSystem.systemPooledRating;
 		for (final Player player : players.getPlayers()) {
 			if (player.matchCount > 0L) {
 				ratingPool += player.rating;
