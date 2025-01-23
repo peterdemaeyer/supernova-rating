@@ -51,7 +51,7 @@ class DeMaeyerRatingSystemTest implements RatingSystemTest, SerializableTest {
 		assertTrue(weakestPlayer.rating < weakerPlayer.rating);
 		assertTrue(weakerPlayer.rating < strongerPlayer.rating);
 		assertTrue(strongerPlayer.rating < strongestPlayer.rating);
-		assertTrue(weakestPlayer.rating >= 2. / 9. * strongestPlayer.rating);
+		assertTrue(weakestPlayer.rating >= 2. / 9. * 6. / 9. * strongestPlayer.rating);
 	}
 
 	@Test
@@ -108,13 +108,13 @@ class DeMaeyerRatingSystemTest implements RatingSystemTest, SerializableTest {
 		final Match match = Padel.newMatch(strongUnratedPlayer1, strongUnratedPlayer2, ratedPlayer1, ratedPlayer2, 9L, 0L);
 		ratingSystem.apply(match);
 		printRatings(match);
-		assertEquals(241.67, strongUnratedPlayer1.rating, .01);
+		assertEquals(219.55, strongUnratedPlayer1.rating, .01);
 		assertEquals(1L, strongUnratedPlayer1.matchCount);
 		assertEquals(strongUnratedPlayer1.rating, strongUnratedPlayer2.rating, .01);
 		assertEquals(1L, strongUnratedPlayer2.matchCount);
-		assertEquals(639.85, ratedPlayer1.rating, .01);
+		assertEquals(659.52, ratedPlayer1.rating, .01);
 		assertEquals(101L, ratedPlayer1.matchCount);
-		assertEquals(799.81, ratedPlayer2.rating, .01);
+		assertEquals(824.39, ratedPlayer2.rating, .01);
 		assertEquals(101L, ratedPlayer2.matchCount);
 		// 1923 = 800 + 1000 + 50 + 50 + (portion of rating pool excess = 23)
 		assertEquals(1923., sumOfRatings(strongUnratedPlayer1, strongUnratedPlayer2, ratedPlayer1, ratedPlayer2));
@@ -129,13 +129,13 @@ class DeMaeyerRatingSystemTest implements RatingSystemTest, SerializableTest {
 		final DeMaeyerRatingSystem ratingSystem = new DeMaeyerRatingSystem.Builder().build();
 		final Match match1234 = Padel.newMatch(underratedPlayer1, player2, player3, player4, 7L, 9L);
 		ratingSystem.apply(match1234);
-		assertEquals(13.12, underratedPlayer1.rating, .01);
+		assertEquals(10.62, underratedPlayer1.rating, .01);
 		final Match match1324 = Padel.newMatch(underratedPlayer1, player3, player2, player4, 9L, 6L);
 		ratingSystem.apply(match1324);
-		assertEquals(19.73, underratedPlayer1.rating, .01);
+		assertEquals(12.64, underratedPlayer1.rating, .01);
 		final Match match1423 = Padel.newMatch(underratedPlayer1, player4, player2, player3, 9L, 8L);
 		ratingSystem.apply(match1423);
-		assertEquals(28.80, underratedPlayer1.rating, .01);
+		assertEquals(13.97, underratedPlayer1.rating, .01);
 	}
 
 	@Test

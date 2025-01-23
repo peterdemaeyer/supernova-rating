@@ -1,0 +1,18 @@
+[kiro, kama] - [evde, elde] = 6 - 0
+[kiro, evde] - [kama, elde] = 2 - 6
+[kiro, elde] - [kama, evde] = 6 - 3
+
+[mava, pede] - [daco, stle] = 2 - 6
+[mava, daco] - [pede, stle] = 6 - 3
+[mava, stle] - [pede, daco] = 5 - 6
+
+[vico, jedh] - [bava, hava] = 6 - 4
+[vico, bava] - [jedh, hava] = 2 - 6
+[vico, hava] - [jedh, bava] = 3 - 6
+
+[gupe, chva] - [elle, made] = 6 - 2
+[gupe, elle] - [chva, made] = 6 - 1
+[gupe, made] - [chva, elle] = 8 - 6
+
+[kade, krpy] - [elee, jape] = 9 - 1
+[kade, jape] - [elee, krpy] = 9 - 8

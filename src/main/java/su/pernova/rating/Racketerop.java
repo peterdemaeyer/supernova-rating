@@ -2,6 +2,8 @@ package su.pernova.rating;
 
 import static java.lang.ClassLoader.getSystemResource;
 import static java.lang.String.format;
+import static java.nio.file.Files.exists;
+import static java.nio.file.Files.newInputStream;
 import static java.nio.file.Files.newOutputStream;
 import static java.util.Comparator.comparingDouble;
 
@@ -10,7 +12,8 @@ import java.io.ObjectOutputStream;
 import java.io.PrintStream;
 import java.net.URI;
 import java.net.URL;
-import java.nio.file.Paths;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.SortedSet;
@@ -20,25 +23,17 @@ import su.pernova.rating.de.maeyer.DeMaeyerRatingSystem;
 
 public class Racketerop {
 
-	public static void main(String[] args) throws Exception {
-		URL url = getSystemResource("players.ser");
-		Players players;
-		if (url != null) {
-			try (final ObjectInputStream objIn = new ObjectInputStream(url.openStream())) {
-				System.out.println("Loading players from: " + url);
-				players = (Players) objIn.readObject();
-			}
-		} else {
-			url = Paths.get("players.ser").toUri().toURL();
-			players = new Players(new LinkedHashMap<>());
-		}
+	public static void main(final String... args) throws Exception {
+		final Players players = new Players(new LinkedHashMap<>());
+		Path playersSer = null;
 		final DeMaeyerRatingSystem ratingSystem = new DeMaeyerRatingSystem.Builder()
 				.setAbsorptionFactor(.1)
 				.setNewPlayerRating(75.)
 				.setNewPlayerPooledRating(125.)
 				.build();
 		for (final String arg : args) {
-			final URI uri = getSystemResource(arg).toURI();
+			final URL url = getSystemResource(arg);
+			final URI uri = url != null ? url.toURI() : new URI(arg);
 			if (arg.endsWith(".csv")) {
 				players.registerAll(uri);
 			} else if (arg.endsWith(".txt")) {
@@ -47,10 +42,18 @@ public class Racketerop {
 					ratingSystem.apply(match);
 				}
 				printRatings(System.out, players, uri);
+			} else if (arg.endsWith(".ser")) {
+				playersSer = Path.of(uri);
+				if (exists(playersSer)) {
+					try (final ObjectInputStream objIn = new ObjectInputStream(newInputStream(playersSer))) {
+						System.out.println("Loading players from: " + playersSer);
+						players.registerAll((Players) objIn.readObject());
+					}
+				}
 			}
 		}
-		try (final ObjectOutputStream objOut = new ObjectOutputStream(newOutputStream(Paths.get(url.toURI())))) {
-			System.out.println("Writing players to: " + url);
+		try (final ObjectOutputStream objOut = new ObjectOutputStream(newOutputStream(playersSer))) {
+			System.out.println("Writing players to: " + playersSer);
 			objOut.writeObject(players);
 		}
 	}
@@ -65,7 +68,7 @@ public class Racketerop {
 		return ratingPool;
 	}
 
-	private static void printRatings(PrintStream stream, Players players, Object subject) {
+	public static void printRatings(final PrintStream stream, final Players players, final Object subject) {
 		stream.println(format("=== rating after %s ===", subject));
 		Comparator<Player> orderByRating = comparingDouble(player -> player.rating);
 		orderByRating = orderByRating.thenComparing(player -> player.id);

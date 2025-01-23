@@ -1,0 +1,19 @@
+[vico, stle] - [kiro, kave] = 6 - 0
+[vico, kiro] - [stle, kave] = 6 - 0
+[vico, kave] - [stle, kiro] = 0 - 6
+
+[made, stsp] - [gupe, daco] = 0 - 6
+[made, gupe] - [stsp, daco] = 3 - 6
+[made, daco] - [stsp, gupe] = 2 - 6
+
+[jape, brde] - [elde, kama] = 6 - 0
+[jape, elde] - [brde, kama] = 1 - 6
+[jape, kama] - [brde, elde] = 1 - 6
+
+[hava, gede] - [bava, pede] = 6 - 3
+[hava, bava] - [gede, pede] = 6 - 2
+[hava, pede] - [gede, bava] = 2 - 6
+
+[evde, luva] - [nipa, hava] = 0 - 6
+[evde, nipa] - [luva, hava] = 0 - 6
+[evde, hava] - [luva, nipa] = 2 - 6

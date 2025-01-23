@@ -31,6 +31,10 @@ public final class Players implements Serializable {
 		return playersByKey.get(key);
 	}
 
+	public void registerAll(final Players players) {
+		playersByKey.putAll(players.playersByKey);
+	}
+
 	public void registerAll(final URI uri) throws IOException {
 		if (!uri.getPath().endsWith(".csv")) {
 			throw new IllegalArgumentException("not a CSV resource");

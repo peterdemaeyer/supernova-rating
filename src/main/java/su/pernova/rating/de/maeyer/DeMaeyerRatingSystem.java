@@ -195,20 +195,15 @@ public class DeMaeyerRatingSystem implements RatingSystem {
 		final double ratingLimit1 = computeRatingLimit1(actualGameRatio1, sumOfWeighedRatings);
 		if (actualGameRatio1 < expectedGameRatio1) {
 			// Team 2 wins.
-			if (ratingLimit1 > sumOfWeighedRatings1) {
-				// Contradictory situation: team 2 loses weight even though they did better than expected.
-				// Assume it can't happen.
-				throw new IllegalArgumentException("losing rating limit: " + ratingLimit1 + " > sum of weighed ratings 1: " + sumOfWeighedRatings1);
-			}
-			return ratingLimit1 + actualGameRatio1 / expectedGameRatio1 * (sumOfWeighedRatings1 - ratingLimit1);
+			// If ratingLimit1 > sumOfWeighedRatings1, the situation is contradictory.
+			// Team 2 would lose rating even though they did better than expected.
+			// Don't let that happen -> take the max.
+			// If winRating1 > sumOfWeighedRatings1, the situation is equally contradictory.
+			// Don't let that happen -> take the min.
+			return min(sumOfWeighedRatings1, max(ratingLimit1, actualGameRatio1 / expectedGameRatio1 * sumOfWeighedRatings1));
 		}
 		// Team 1 wins.
-		if (ratingLimit1 < sumOfWeighedRatings1) {
-			// Contradictory situation: team 1 loses weight even though they did better than expected.
-			// Assume it can't happen.
-			throw new IllegalArgumentException("winning rating limit: " + ratingLimit1 + " < sum of weighed ratings 1: " + sumOfWeighedRatings1);
-		}
-		return sumOfWeighedRatings - expectedGameRatio1 / actualGameRatio1 * (sumOfWeighedRatings2 - ratingLimit1);
+		return sumOfWeighedRatings - min(sumOfWeighedRatings2, max(sumOfWeighedRatings - ratingLimit1, expectedGameRatio1 / actualGameRatio1 * sumOfWeighedRatings2));
 	}
 
 	private static double computeRatingLimit1(final double gameRatio1, final double sumOfWeighedRatings) {
