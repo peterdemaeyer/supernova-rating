@@ -1,12 +1,19 @@
 package su.pernova.rating;
 
 import static java.nio.file.Files.newInputStream;
+import static java.util.Comparator.comparingDouble;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.ObjectInputStream;
 import java.net.URI;
 import java.nio.file.Path;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -36,6 +43,12 @@ class RacketeropTest {
 		try (final ObjectInputStream objIn = new ObjectInputStream(newInputStream(playersSer))) {
 			players.registerAll((Players) objIn.readObject());
 		}
-		Racketerop.printRatings(System.out, players, "Racket-Erop 2023");
+		Comparator<Player> sortedByRatingThenById = comparingDouble(player -> player.rating);
+		sortedByRatingThenById = sortedByRatingThenById.thenComparing(player -> player.id);
+		sortedByRatingThenById = sortedByRatingThenById.reversed();
+		final SortedSet<Player> sortedPlayers = new TreeSet<>(sortedByRatingThenById);
+		sortedPlayers.addAll(players.getPlayers());
+		assertEquals("Hans Van den Brande", sortedPlayers.first().name);
+		assertEquals("Maritsa Roesems", sortedPlayers.last().name);
 	}
 }

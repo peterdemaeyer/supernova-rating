@@ -41,7 +41,6 @@ public class Racketerop {
 					System.out.println("Applying rating system to match: " + match);
 					ratingSystem.apply(match);
 				}
-				printRatings(System.out, players, uri);
 			} else if (arg.endsWith(".ser")) {
 				playersSer = Path.of(uri);
 				if (exists(playersSer)) {
@@ -56,16 +55,6 @@ public class Racketerop {
 			System.out.println("Writing players to: " + playersSer);
 			objOut.writeObject(players);
 		}
-	}
-
-	private static double computeRatingPool(final DeMaeyerRatingSystem ratingSystem, final Players players) {
-		double ratingPool = ratingSystem.systemPooledRating;
-		for (final Player player : players.getPlayers()) {
-			if (player.matchCount > 0L) {
-				ratingPool += player.rating;
-			}
-		}
-		return ratingPool;
 	}
 
 	public static void printRatings(final PrintStream stream, final Players players, final Object subject) {
