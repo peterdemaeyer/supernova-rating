@@ -13,9 +13,10 @@ import java.util.LinkedHashMap;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+
+import su.pernova.racketerop.Racketerop;
 
 class RacketeropTest {
 

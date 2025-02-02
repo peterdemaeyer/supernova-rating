@@ -55,13 +55,13 @@ public final class Players implements Serializable {
 				final String[] columns = line.split(",");
 				final String lidnummer = columns[lidnummerIndex];
 				final Player[] newPlayer = new Player[1];
-				final String[] namen = new String[2];
+				final String[] names = new String[2];
 				playersByKey.computeIfAbsent(lidnummer, ignored -> newPlayer[0] = new Player(
 						lidnummer,
-						(namen[0] = columns[voornaamIndex].trim()) + " " + (namen[1] = columns[naamIndex].trim())
+						(names[0] = columns[voornaamIndex].trim()) + " " + (names[1] = columns[naamIndex].trim())
 				));
 				if (newPlayer[0] != null) {
-					final String shortname = computeShortname(namen);
+					final String shortname = computeShortname(names);
 					System.out.println("Registering new player: " + newPlayer[0] + " with shortname: " + shortname);
 					playersByKey.putIfAbsent(shortname, newPlayer[0]);
 				}
@@ -69,7 +69,7 @@ public final class Players implements Serializable {
 		}
 	}
 
-	private static String computeShortname(final String[] names) {
+	public static String computeShortname(final String[] names) {
 		final StringBuilder builder = new StringBuilder(names[0]);
 		for (final String part : names[1].split(" ")) {
 			builder.append(part.charAt(0));
