@@ -1,5 +1,7 @@
 package su.pernova.rating.de.maeyer;
 
+import java.io.Serial;
+
 import su.pernova.rating.Player;
 
 /**
@@ -7,6 +9,7 @@ import su.pernova.rating.Player;
  */
 public class AverageWeightPolicy implements WeightPolicy {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	@Override

@@ -2,6 +2,8 @@ package su.pernova.rating.de.maeyer;
 
 import static java.util.Objects.requireNonNull;
 
+import java.io.Serial;
+
 import su.pernova.rating.Player;
 
 /**
@@ -9,6 +11,7 @@ import su.pernova.rating.Player;
  */
 public class MaxWeightPolicy implements WeightPolicy {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private final WeightPolicy[] weightPolicies;

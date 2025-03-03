@@ -38,6 +38,7 @@ import su.pernova.rating.Matches;
 import su.pernova.rating.Player;
 import su.pernova.rating.Players;
 import su.pernova.rating.de.maeyer.DeMaeyerRatingSystem;
+import su.pernova.rating.de.maeyer.FixedWeightPolicy;
 
 public class Racketerop {
 
